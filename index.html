@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thailand 2026 — The Itinerary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --sea-deep: #0a4d5c;
+    --sea: #14808f;
+    --surf: #4dd0c4;
+    --sand: #f6efe2;
+    --sand-deep: #ece0c8;
+    --coral: #ff6b4a;
+    --sun: #ffb340;
+    --ink: #0d2b30;
+    --ink-soft: #4a6a6e;
+    --white: #fffdf8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--sand);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap { max-width: 560px; margin: 0 auto; position: relative; }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 55%, var(--surf) 130%);
+    color: var(--white);
+    padding: 54px 28px 46px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 40px;
+    background: var(--sand);
+    -webkit-mask: radial-gradient(22px at 22px 40px, transparent 98%, #000) repeat-x;
+    mask: radial-gradient(22px at 22px 40px, transparent 98%, #000) repeat-x;
+    -webkit-mask-size: 44px 40px;
+    mask-size: 44px 40px;
+  }
+  .hero .eyebrow {
+    font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase;
+    font-weight: 600; color: var(--surf); margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Caprasimo', serif;
+    font-size: 52px; line-height: 0.98; font-weight: 400;
+    margin-bottom: 18px; letter-spacing: -0.01em;
+  }
+  .hero h1 .sm { display: block; font-size: 27px; color: var(--sun); }
+  .hero .dates {
+    font-size: 15px; font-weight: 300; opacity: 0.92;
+    display: flex; gap: 18px; flex-wrap: wrap;
+  }
+  .hero .dates b { font-weight: 600; }
+  .pill-row { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+  .pill {
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22);
+    padding: 7px 13px; border-radius: 100px; font-size: 13px; font-weight: 500;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ---- PROGRESS ---- */
+  .tracker {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(246,239,226,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--sand-deep);
+    padding: 12px 20px;
+  }
+  .tracker-bar {
+    height: 7px; background: var(--sand-deep); border-radius: 100px;
+    overflow: hidden;
+  }
+  .tracker-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--sea), var(--surf));
+    border-radius: 100px; transition: width 0.4s ease;
+  }
+  .tracker-label {
+    font-size: 11.5px; font-weight: 600; color: var(--ink-soft);
+    margin-top: 6px; letter-spacing: 0.04em;
+    display: flex; justify-content: space-between;
+  }
+  .tracker-label .done { color: var(--sea); }
+
+  /* ---- INTRO STRIP ---- */
+  .intro {
+    padding: 26px 28px 6px; font-size: 14.5px; color: var(--ink-soft);
+  }
+  .intro b { color: var(--ink); font-weight: 600; }
+
+  /* ---- TIMELINE ---- */
+  .timeline { padding: 18px 20px 40px; position: relative; }
+
+  .day {
+    background: var(--white);
+    border-radius: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 18px rgba(13,43,48,0.06);
+    overflow: hidden;
+    border: 1px solid rgba(13,43,48,0.04);
+  }
+  .day-head {
+    display: flex; align-items: center; gap: 15px;
+    padding: 17px 18px; cursor: pointer;
+    user-select: none; position: relative;
+    transition: background 0.2s;
+  }
+  .day-head:hover { background: rgba(20,128,143,0.03); }
+  .day-num {
+    flex-shrink: 0; width: 50px; height: 50px; border-radius: 14px;
+    background: var(--sea-deep); color: var(--white);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .day-num .d { font-family: 'Caprasimo', serif; font-size: 22px; }
+  .day-num .m { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; opacity: 0.85; }
+  .day-head.party .day-num { background: var(--coral); }
+  .day-head.fly .day-num { background: var(--sun); color: var(--ink); }
+
+  .day-meta { flex: 1; min-width: 0; }
+  .day-meta .dow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+  .day-meta .place { font-family: 'Caprasimo', serif; font-size: 19px; line-height: 1.1; margin-top: 1px; }
+  .day-meta .place .arrow { color: var(--surf); font-family: 'Outfit'; font-weight: 400; }
+
+  .chev {
+    flex-shrink: 0; width: 26px; height: 26px; color: var(--ink-soft);
+    transition: transform 0.35s cubic-bezier(.5,0,.2,1);
+  }
+  .day.open .chev { transform: rotate(180deg); }
+
+  .day-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .day-body-inner { padding: 2px 18px 20px; }
+
+  .event {
+    display: flex; gap: 13px; padding: 11px 0;
+    border-top: 1px dashed var(--sand-deep);
+  }
+  .event:first-child { border-top: none; }
+  .event-time {
+    flex-shrink: 0; width: 60px; font-size: 13px; font-weight: 600;
+    color: var(--sea); padding-top: 1px;
+  }
+  .event-body { flex: 1; }
+  .event-body .t { font-weight: 600; font-size: 14.5px; }
+  .event-body .s { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .event-icon { font-size: 15px; }
+
+  .attire {
+    display: flex; gap: 11px; align-items: flex-start;
+    background: linear-gradient(135deg, #eafaf7, #d6f2ec);
+    border-radius: 12px; padding: 11px 13px; margin-top: 13px;
+    border: 1px solid rgba(77,208,196,0.45);
+  }
+  .attire-icon { font-size: 17px; flex-shrink: 0; line-height: 1.3; }
+  .attire .av { font-size: 13px; color: var(--sea-deep); }
+  .attire .av b {
+    display: block; font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--sea); margin-bottom: 3px; font-weight: 700;
+  }
+
+  .packbox {
+    margin: 4px 20px 22px;
+    background: var(--white);
+    border-radius: 18px; padding: 18px 18px 16px;
+    box-shadow: 0 2px 18px rgba(13,43,48,0.06);
+    border: 1px solid rgba(13,43,48,0.04);
+  }
+  .packbox-h {
+    font-family: 'Caprasimo', serif; font-size: 18px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .packbox-grid { display: flex; flex-direction: column; gap: 10px; }
+  .packbox-grid > span {
+    font-size: 13.5px; color: var(--ink-soft); display: flex; gap: 10px;
+    align-items: flex-start; line-height: 1.35;
+  }
+  .packbox-grid b { color: var(--ink); font-weight: 600; }
+
+  .wardrobe {
+    margin: 4px 20px 24px;
+    background: linear-gradient(170deg, var(--sea-deep), var(--sea));
+    color: var(--white);
+    border-radius: 20px; padding: 22px 20px 20px;
+    box-shadow: 0 4px 22px rgba(10,77,92,0.22);
+  }
+  .wardrobe-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .wardrobe-eyebrow {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--surf); font-weight: 600; margin-bottom: 4px;
+  }
+  .wardrobe-title {
+    font-family: 'Caprasimo', serif; font-size: 26px; font-weight: 400;
+    display: flex; align-items: center; gap: 9px; line-height: 1;
+  }
+  .wreset {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+    color: var(--white); font-family: 'Outfit'; font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 100px; cursor: pointer; flex-shrink: 0;
+    transition: transform 0.16s;
+  }
+  .wreset:active { transform: scale(0.94); }
+  .wardrobe-bar {
+    height: 7px; background: rgba(255,255,255,0.18); border-radius: 100px;
+    overflow: hidden; margin: 18px 0 7px;
+  }
+  .wardrobe-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--surf), var(--sun));
+    border-radius: 100px; transition: width 0.35s ease;
+  }
+  .wardrobe-count {
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.82);
+    letter-spacing: 0.03em; margin-bottom: 20px;
+  }
+  .wcat { margin-bottom: 16px; }
+  .wcat-name {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--surf); margin-bottom: 6px;
+  }
+  .wlist { list-style: none; }
+  .witem {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 0; cursor: pointer; user-select: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .witem:last-child { border-bottom: none; }
+  .wcheck {
+    flex-shrink: 0; width: 21px; height: 21px; border-radius: 7px;
+    border: 2px solid rgba(255,255,255,0.4); position: relative;
+    transition: all 0.18s;
+  }
+  .witem.packed .wcheck { background: var(--surf); border-color: var(--surf); }
+  .witem.packed .wcheck::after {
+    content: ""; position: absolute; left: 6px; top: 2px;
+    width: 5px; height: 10px; border: solid var(--sea-deep);
+    border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+  }
+  .wlabel { flex: 1; font-size: 14.5px; font-weight: 500; transition: opacity 0.18s; }
+  .witem.packed .wlabel { opacity: 0.45; text-decoration: line-through; }
+  .wlabel .opt { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 400; }
+  .wqty {
+    flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--sun);
+    background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 8px;
+    min-width: 40px; text-align: center;
+  }
+  .wardrobe-total {
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.14);
+  }
+  .wt-row { display: flex; align-items: baseline; gap: 12px; }
+  .wt-big {
+    font-family: 'Caprasimo', serif; font-size: 36px; color: var(--sun); line-height: 1;
+  }
+  .wt-big span { font-size: 15px; color: var(--white); font-family: 'Outfit'; font-weight: 600; }
+  .wt-note { font-size: 12.5px; color: rgba(255,255,255,0.82); line-height: 1.35; font-weight: 500; }
+  .wt-fine { font-size: 11.5px; color: rgba(255,255,255,0.6); line-height: 1.45; margin-top: 12px; }
+
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 6px; margin-top: 7px;
+    letter-spacing: 0.02em;
+  }
+  .tag.code { background: var(--sand-deep); color: var(--ink-soft); font-family: monospace; letter-spacing: 0.05em; }
+  .tag.party { background: rgba(255,107,74,0.14); color: var(--coral); }
+  .tag.heads { background: rgba(255,179,64,0.18); color: #b97400; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .mini-btn {
+    font-size: 12px; font-weight: 600; text-decoration: none;
+    padding: 7px 12px; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--sand-deep); color: var(--sea); background: var(--white);
+    transition: all 0.18s;
+  }
+  .mini-btn:active { transform: scale(0.96); }
+  .mini-btn.fill { background: var(--sea); color: var(--white); border-color: var(--sea); }
+
+  /* ---- ALERT ---- */
+  .alert {
+    background: linear-gradient(135deg, #fff4e8, #ffe9d6);
+    border: 1px solid var(--sun);
+    border-radius: 16px; margin: 4px 20px 24px;
+    padding: 16px 18px;
+    display: flex; gap: 12px;
+  }
+  .alert .ai { font-size: 22px; flex-shrink: 0; }
+  .alert .at { font-size: 13.5px; color: #6b4a16; }
+  .alert .at b { color: var(--ink); display: block; margin-bottom: 3px; font-size: 14px; }
+
+  /* ---- FOOTER ---- */
+  .foot {
+    background: var(--sea-deep); color: var(--white);
+    padding: 30px 28px 38px; text-align: center;
+  }
+  .foot .crew { font-size: 13px; opacity: 0.8; letter-spacing: 0.04em; }
+  .foot h3 { font-family: 'Caprasimo', serif; font-size: 24px; font-weight: 400; margin: 6px 0 18px; }
+  .share-btn {
+    background: var(--surf); color: var(--sea-deep); border: none;
+    font-family: 'Outfit'; font-size: 15px; font-weight: 700;
+    padding: 14px 30px; border-radius: 100px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform 0.18s;
+  }
+  .share-btn:active { transform: scale(0.96); }
+  .foot .note { font-size: 11.5px; opacity: 0.55; margin-top: 18px; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--ink); color: var(--white); padding: 12px 22px;
+    border-radius: 100px; font-size: 13.5px; font-weight: 500;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.25); z-index: 100;
+    transition: transform 0.35s cubic-bezier(.5,0,.2,1); opacity: 0.97;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">8 friends · 1 island chain</div>
+    <h1>Koh Samui</h1>
+    <div class="dates">
+      <span><b>Fri 26 Jun</b> → <b>Sun 5 Jul</b></span>
+      <span>· 9 nights</span>
+    </div>
+    <div class="pill-row">
+      <span class="pill">🏝️ Phuket</span>
+      <span class="pill">⛴️ Don Sak</span>
+      <span class="pill">🌴 Koh Samui</span>
+      <span class="pill">🌙 Koh Phangan</span>
+    </div>
+  </header>
+
+  <div class="tracker">
+    <div class="tracker-bar"><div class="tracker-fill" id="fill"></div></div>
+    <div class="tracker-label">
+      <span id="trackTxt">Tap a day to open it</span>
+      <span class="done" id="trackCount">0 / 7 opened</span>
+    </div>
+  </div>
+
+  <div class="intro">
+    Everything's booked. Here's how the 9 days flow — <b>tap any day</b> to see check-in times, confirmation codes, what's happening, and what to wear. Call buttons dial the host directly.
+  </div>
+
+  <div class="packbox">
+    <div class="packbox-h">🎒 Pack-once essentials</div>
+    <div class="packbox-grid">
+      <span>🌧️<span><b>Rain jacket or poncho</b> — late June is monsoon (green) season; expect short, heavy afternoon showers.</span></span>
+      <span>👕<span><b>Quick-dry, breathable fabrics</b> — hot and humid (~30°C) every one of the nine days.</span></span>
+      <span>🩱<span><b>2+ swimwear sets</b> and a cover-up — beaches, pools and ferries throughout.</span></span>
+      <span>🩴<span><b>Sandals plus one pair of closed shoes</b> for the party beach and any hikes.</span></span>
+      <span>🧴<span><b>Reef-safe sunscreen + after-sun</b> — the boat days leave you fully exposed.</span></span>
+      <span>🎉<span><b>Neon / UV-reactive bits</b> for the Black Moon Party on the 29th.</span></span>
+      <span>🔌<span><b>Universal adapter</b> — Thailand runs 230V; sockets take Type A/B/C.</span></span>
+      <span>💊<span><b>Motion-sickness tablets</b> for the Don Sak and Koh Phangan ferry crossings.</span></span>
+    </div>
+  </div>
+
+  <div class="timeline" id="timeline">
+
+    <!-- DAY 1 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">26</span><span class="m">Jun</span></div>
+        <div class="day-meta">
+          <div class="dow">Friday · Arrival</div>
+          <div class="place">Land in Phuket 🛬</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">~12:30</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">✈️</span> Touch down at Phuket (HKT)</div>
+            <div class="s">Early-morning flight from India, arriving midday.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">3:00 PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🏠</span> Check in — Mira House</div>
+            <div class="s">4BR / 3BA · Naiyang Beach, right by the airport. 7 guests tonight.</div>
+            <span class="tag code">HM8292H55C</span>
+            <div class="btn-row">
+              <a class="mini-btn fill" href="tel:+66640610415">📞 Call host (Pom)</a>
+              <a class="mini-btn" href="https://maps.google.com/?q=99,+6+Muban+Chao+Wilai,+Tambon+Sa+Khu,+Phuket+83110" target="_blank">📍 Map</a>
+            </div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">Eve</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🌙</span> Night in Phuket</div>
+            <div class="s">Settle in, grab dinner near Naiyang.</div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">👕</span>
+          <div class="av"><b>What to wear</b>Travel comfy for the flight, then switch to beach-casual — shorts, tee, sandals. Keep a light layer handy for over-AC vans and restaurants.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">27</span><span class="m">Jun</span></div>
+        <div class="day-meta">
+          <div class="dow">Saturday · Transit</div>
+          <div class="place">Phuket <span class="arrow">→</span> Don Sak</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">AM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">⏳</span> Wait for the 8th friend to land</div>
+            <div class="s">Whole crew together once they arrive.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">~Noon</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🚗</span> Drive Phuket → Don Sak</div>
+            <div class="s">Roughly 3.5–4 hrs by road.</div>
+            <span class="tag heads">⚠️ Leave by noon to beat the 9 PM check-in cutoff</span>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">7–8 PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🏠</span> Check in — Loma Marine Pool Villa</div>
+            <div class="s">Next to Sea-Tran Pier. Check-in window 2–9 PM; they expect you 7–8 PM. Free parking (reserved).</div>
+            <span class="tag code">Booking · ruthvika.1995</span>
+            <div class="btn-row">
+              <a class="mini-btn fill" href="tel:+66996349889">📞 Call villa</a>
+              <a class="mini-btn" href="https://maps.google.com/?q=9.314317,99.733017" target="_blank">📍 Map</a>
+            </div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🧥</span>
+          <div class="av"><b>What to wear</b>Loose, breathable clothes for the 4-hour drive and slip-on shoes. Bring a hoodie or light jacket — the van AC runs cold on long hauls.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">28</span><span class="m">Jun</span></div>
+        <div class="day-meta">
+          <div class="dow">Sunday · Ferry day</div>
+          <div class="place">Don Sak <span class="arrow">→</span> Koh Samui</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">11:30</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🧳</span> Check out of Loma (by 12:00)</div>
+            <div class="s">Pier is right next door — easy walk/short hop.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">Midday</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">⛴️</span> Sea-Tran ferry to Koh Samui</div>
+            <div class="s">Crossing to the island.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">3:00 PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🌴</span> Check in — Villa Staring at the Sea</div>
+            <div class="s">Maret, Koh Samui. Home base through Sat 4 Jul — your stuff stays here even on the Phangan night.</div>
+            <span class="tag code">HMCYY8MJF3</span>
+            <div class="btn-row">
+              <a class="mini-btn fill" href="tel:+66632081874">📞 Call host (Alexandre)</a>
+              <a class="mini-btn" href="https://maps.google.com/?q=Maret+Koh+Samui+Surat+Thani+84310" target="_blank">📍 Map</a>
+            </div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🧢</span>
+          <div class="av"><b>What to wear</b>Quick-dry and sun-ready for the boat — cap, sunglasses, sunscreen on before you board. Skip delicate fabrics; sea spray is guaranteed.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 4 -->
+    <div class="day">
+      <div class="day-head party">
+        <div class="day-num"><span class="d">29</span><span class="m">Jun</span></div>
+        <div class="day-meta">
+          <div class="dow">Monday · The big night</div>
+          <div class="place">Koh Phangan 🌙</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">3–4 PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🏖️</span> Check in — Mac's Bay Resort</div>
+            <div class="s">Bantai, Koh Phangan. 2 quad rooms, sea + pool view. Ferry over from Samui earlier in the day.</div>
+            <span class="tag code">Booking · ruthvika.1995</span>
+            <div class="btn-row">
+              <a class="mini-btn fill" href="tel:+66623709760">📞 Call resort</a>
+              <a class="mini-btn" href="https://maps.google.com/?q=9.697450,100.027167" target="_blank">📍 Map</a>
+            </div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">Night</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🌑</span> Black Moon Party</div>
+            <div class="s">Free entry for Mac's Bay guests. This is the reason for the whole detour.</div>
+            <span class="tag party">🎉 Free entry included</span>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🎉</span>
+          <div class="av"><b>What to wear</b>Daytime: swimwear and a cover-up. Night: a party fit you don't mind sweating in, with neon or UV-reactive accents that glow under the lights. Wear closed-toe or sturdy sandals — the beach gets glass — and carry minimal valuables.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 5 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">30</span><span class="m">Jun</span></div>
+        <div class="day-meta">
+          <div class="dow">Tuesday · Recover</div>
+          <div class="place">Back to Koh Samui <span class="arrow">↩</span></div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">By 12:00</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🧳</span> Check out of Mac's Bay</div>
+            <div class="s">Ferry back across to Samui.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🌴</span> Back to the Samui villa</div>
+            <div class="s">No new check-in — you're returning to Villa Staring at the Sea, held since Sun.</div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🩴</span>
+          <div class="av"><b>What to wear</b>Easy recovery mode — loungewear, swimwear for the pool, flip-flops. Sunglasses for the morning-after glare.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 6 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">1–3</span><span class="m">Jul</span></div>
+        <div class="day-meta">
+          <div class="dow">Wed–Fri · Island time</div>
+          <div class="place">Koh Samui, free days ☀️</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">All</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🏝️</span> Three open days on Samui</div>
+            <div class="s">Beaches, Ang Thong marine park, Fisherman's Village, waterfalls — nothing locked in, plan as you go.</div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">👙</span>
+          <div class="av"><b>What to wear</b>Beachwear by day; one slightly nicer outfit for a Fisherman's Village dinner. Pack water shoes and activewear if you'll do waterfalls or an Ang Thong kayak day.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 7 -->
+    <div class="day">
+      <div class="day-head">
+        <div class="day-num"><span class="d">4</span><span class="m">Jul</span></div>
+        <div class="day-meta">
+          <div class="dow">Saturday · Transit</div>
+          <div class="place">Samui <span class="arrow">→</span> Phuket</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">11:00</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🧳</span> Check out of Samui villa</div>
+            <div class="s">Ferry + road back toward Phuket.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">3:00 PM</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🏠</span> Check in — Mira House (again)</div>
+            <div class="s">Same Naiyang Beach villa as night one. All 8 guests. Last night in Thailand.</div>
+            <span class="tag code">HMNCJ9Q5DA</span>
+            <div class="btn-row">
+              <a class="mini-btn fill" href="tel:+66640610415">📞 Call host (Pom)</a>
+              <a class="mini-btn" href="https://maps.google.com/?q=99,+6+Muban+Chao+Wilai,+Tambon+Sa+Khu,+Phuket+83110" target="_blank">📍 Map</a>
+            </div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🧥</span>
+          <div class="av"><b>What to wear</b>Same travel uniform as the way out — comfy, layered for ferry and van AC, easy shoes you can slip on and off.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DAY 8 -->
+    <div class="day">
+      <div class="day-head fly">
+        <div class="day-num"><span class="d">5</span><span class="m">Jul</span></div>
+        <div class="day-meta">
+          <div class="dow">Sunday · Departure</div>
+          <div class="place">Fly home 🛫</div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="day-body"><div class="day-body-inner">
+        <div class="event">
+          <div class="event-time">11:00</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">🧳</span> Check out of Mira House</div>
+            <div class="s">Bags packed, head to HKT.</div>
+          </div>
+        </div>
+        <div class="event">
+          <div class="event-time">~Noon</div>
+          <div class="event-body">
+            <div class="t"><span class="event-icon">✈️</span> Depart Phuket for India</div>
+            <div class="s">That's a wrap. 🇹🇭</div>
+          </div>
+        </div>
+        <div class="attire">
+          <span class="attire-icon">🧳</span>
+          <div class="av"><b>What to wear</b>Whatever's comfiest for the flight. Keep one clean set out the night before so you're not digging through a packed bag at checkout.</div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="alert">
+    <div class="ai">⚠️</div>
+    <div class="at">
+      <b>One thing to watch on Sat 27 Jun</b>
+      The Phuket → Don Sak drive is 3.5–4 hrs and Loma's check-in closes at 9 PM. Since you're waiting on a friend's flight first, confirm they land by early afternoon — or you risk arriving after the cutoff.
+    </div>
+  </div>
+
+  <div class="wardrobe">
+    <div class="wardrobe-head">
+      <div>
+        <div class="wardrobe-eyebrow">For 9 days · pack light, re-wear</div>
+        <h2 class="wardrobe-title">🧳 Travel Wardrobe</h2>
+      </div>
+      <button class="wreset" id="wReset">Reset</button>
+    </div>
+    <div class="wardrobe-bar"><div class="wardrobe-fill" id="wFill"></div></div>
+    <div class="wardrobe-count" id="wCount">0 packed</div>
+
+    <div class="wcat">
+      <div class="wcat-name">Tops</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">T-shirts / casual tops</span><span class="wqty">×6</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Tanks / sleeveless</span><span class="wqty">×3</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Nicer top for dinners</span><span class="wqty">×3</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Bottoms</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Shorts</span><span class="wqty">×5</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Light trousers / linen pants</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Comfy travel bottoms</span><span class="wqty">×1</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Beach &amp; party</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Swimwear</span><span class="wqty">×3</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Party outfit (neon / UV)</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Cover-up / sarong</span><span class="wqty">×1</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Layers &amp; rain</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Rain jacket / poncho</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Light hoodie (for AC)</span><span class="wqty">×1</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Footwear</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Sandals / flip-flops</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Sneakers / closed shoes</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Water shoes <span class="opt">· optional</span></span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Trek / hiking shoes <span class="opt">· optional</span></span><span class="wqty">×1</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Basics</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Underwear</span><span class="wqty">×10</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Socks</span><span class="wqty">×3</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Sleepwear</span><span class="wqty">×3</span></li>
+      </ul>
+    </div>
+
+    <div class="wcat">
+      <div class="wcat-name">Accessories</div>
+      <ul class="wlist">
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Cap / hat</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Sunglasses</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Quick-dry towel</span><span class="wqty">×1</span></li>
+        <li class="witem"><span class="wcheck"></span><span class="wlabel">Beach bag / tote</span><span class="wqty">×1</span></li>
+      </ul>
+    </div>
+
+    <div class="wardrobe-total">
+      <div class="wt-row">
+        <div class="wt-big">≈ 50 <span>pieces</span></div>
+        <div class="wt-note">48 core + 2 optional<br>for 9 days, one laundry run</div>
+      </div>
+      <p class="wt-fine">Laundry is cheap and everywhere in Thailand, so counts lean on re-wearing. Adjust your own basics (bras, etc.) to taste. Each person's ticks save automatically on their own device once the page is hosted.</p>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="crew">8 of us · June–July 2026</div>
+    <h3>Let's go island-hopping</h3>
+    <button class="share-btn" id="shareBtn">📤 Share this itinerary</button>
+    <div class="note">Bookings under Ruthvika · times are local Thailand (ICT)</div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast">Copied! Paste it in the group chat 🎉</div>
+
+<script>
+  const days = Array.from(document.querySelectorAll('.day'));
+  const opened = new Set();
+  const fill = document.getElementById('fill');
+  const trackTxt = document.getElementById('trackTxt');
+  const trackCount = document.getElementById('trackCount');
+
+  days.forEach((day, i) => {
+    const head = day.querySelector('.day-head');
+    const body = day.querySelector('.day-body');
+    head.addEventListener('click', () => {
+      const isOpen = day.classList.contains('open');
+      if (isOpen) {
+        day.classList.remove('open');
+        body.style.maxHeight = null;
+      } else {
+        day.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+        opened.add(i);
+      }
+      updateTracker();
+    });
+  });
+
+  function updateTracker() {
+    const pct = (opened.size / days.length) * 100;
+    fill.style.width = pct + '%';
+    trackCount.textContent = opened.size + ' / ' + days.length + ' opened';
+    if (opened.size === 0) trackTxt.textContent = 'Tap a day to open it';
+    else if (opened.size === days.length) trackTxt.textContent = "You've seen the whole trip 🎉";
+    else trackTxt.textContent = 'Keep going…';
+  }
+
+  // recalc heights on resize for open days
+  window.addEventListener('resize', () => {
+    days.forEach(day => {
+      if (day.classList.contains('open')) {
+        const body = day.querySelector('.day-body');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // share
+  const toast = document.getElementById('toast');
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const shareData = {
+      title: 'Thailand 2026 — Koh Samui Trip',
+      text: 'Our 9-day Thailand itinerary (26 Jun – 5 Jul): Phuket → Don Sak → Koh Samui → Koh Phangan moon party → back to Phuket. 🏝️',
+      url: window.location.href
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.text + ' ' + window.location.href);
+        showToast();
+      }
+    } catch (e) {
+      try {
+        await navigator.clipboard.writeText(shareData.text);
+        showToast();
+      } catch (_) {}
+    }
+  });
+
+  function showToast() {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  // wardrobe checklist — saves each person's ticks on their own device
+  const wItems = Array.from(document.querySelectorAll('.witem'));
+  const wFill = document.getElementById('wFill');
+  const wCount = document.getElementById('wCount');
+  const STORE_KEY = 'kohsamui-wardrobe-v1';
+
+  function loadPacked() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function savePacked(state) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch (e) { /* storage blocked (e.g. preview) — runs in-memory for the session */ }
+  }
+  function itemKey(item) {
+    return item.querySelector('.wlabel').textContent.trim().replace(/\s+/g, ' ');
+  }
+
+  let packedState = loadPacked();
+  wItems.forEach(item => { if (packedState[itemKey(item)]) item.classList.add('packed'); });
+
+  function updateWardrobe() {
+    const packed = wItems.filter(i => i.classList.contains('packed')).length;
+    const total = wItems.length;
+    wFill.style.width = (total ? packed / total * 100 : 0) + '%';
+    wCount.textContent = (packed === total && total > 0)
+      ? "All packed — you're ready 🎉"
+      : packed + ' of ' + total + ' packed';
+  }
+  wItems.forEach(item => item.addEventListener('click', () => {
+    item.classList.toggle('packed');
+    packedState[itemKey(item)] = item.classList.contains('packed');
+    savePacked(packedState);
+    updateWardrobe();
+  }));
+  document.getElementById('wReset').addEventListener('click', () => {
+    wItems.forEach(i => i.classList.remove('packed'));
+    packedState = {};
+    savePacked(packedState);
+    updateWardrobe();
+  });
+  updateWardrobe();
+
+  // open day 1 by default
+  days[0].querySelector('.day-head').click();
+</script>
+</body>
+</html>
