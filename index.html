@@ -389,6 +389,35 @@
   function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
   function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
 
+  /* ===== TOKEN (capability link) ===== */
+  const TOKEN_KEY = 'kohsamui-token';
+  function decodeToken(t){
+    try {
+      const part = t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      const claims = JSON.parse(decodeURIComponent(escape(atob(part))));
+      if (!claims.sub) return null;
+      if (claims.exp && claims.exp * 1000 < Date.now()) return null;   // expired
+      return claims;
+    } catch(e){ return null; }
+  }
+  function readToken(){
+    let t = null;
+    try {
+      const u = new URL(location.href);
+      t = u.searchParams.get('k');
+      if (t){
+        lsSet(TOKEN_KEY, t);
+        u.searchParams.delete('k');
+        history.replaceState(null, '', u.pathname + (u.search || '') + (u.hash || ''));   // strip ?k from the bar
+      } else {
+        t = lsGet(TOKEN_KEY);
+      }
+    } catch(e){ t = lsGet(TOKEN_KEY); }
+    return t || null;
+  }
+  const APP_TOKEN  = readToken();
+  const APP_CLAIMS = APP_TOKEN ? decodeToken(APP_TOKEN) : null;
+
   /* ===== PICKER ===== */
   const picker = document.getElementById('picker');
   document.getElementById('pickerGrid').innerHTML = CHARACTERS.map(c =>
@@ -536,8 +565,11 @@
   /* ===== TABS already wired above ===== */
 
   /* ===== INIT ===== */
+  const tokenId = APP_CLAIMS && CHARACTERS.find(c => c.id === APP_CLAIMS.sub) ? APP_CLAIMS.sub : null;
   const saved = lsGet(CHAR_KEY);
-  if (saved && CHARACTERS.find(c => c.id === saved)) applyCharacter(saved); else { applyCharacter(null); picker.classList.add('show'); }
+  if (tokenId){ lsSet(CHAR_KEY, tokenId); applyCharacter(tokenId); }
+  else if (saved && CHARACTERS.find(c => c.id === saved)) applyCharacter(saved);
+  else { applyCharacter(null); picker.classList.add('show'); }
   // open today if within the trip, else day 1
   const now = new Date(); let start = 0;
   TRIP.forEach((d,i) => { if (now.getFullYear()===2026 && (now.getMonth()+1)===d.m && now.getDate()===parseInt(d.date)) start = i; });
