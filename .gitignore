@@ -8,3 +8,5 @@ tokens.tsv
 # os / tooling noise
 .DS_Store
 .playwright-mcp/
+# supabase CLI scratch
+supabase/.temp/
