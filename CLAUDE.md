@@ -23,12 +23,12 @@ A single-file, mobile-first web app for a group Thailand trip (8 friends, **26 J
 
 ## JS data model (top of the `<script>`)
 - `CHARACTERS` — 8 people `{id, nick, full, emoji, color}`. (Vk/Vivek, Ruthu/Ruthvika, Xavi/Abhishek, Nati/Nihal, Vroom/Varun, Peeps/Deepthi, Deepthy, Adarshi/Adarsh.)
-- `ARRIVAL_DOCS` — `{id: path|null}`. **This is how a TDAC becomes viewable:** drop the person's PDF in the repo (e.g. `docs/ruthu-tdac.pdf`), set their value to that path, push. Their card flips from "Generate" to "View arrival card" everywhere (timeline + Documents).
+- `ARRIVAL_DOCS` — `{id: path|null}`. Manual **fallback** path: drop the person's PDF in the repo (e.g. `docs/ruthu-tdac.pdf`), set their value to that path, push. Used only when there's no `?k` token / Supabase is unreachable; the live path is the Supabase backend (see below).
 - `MIRA(code, hours)`, `LOMA`, `VILLA`, `MACS` — stay objects `{name, sub, addr, hours, ref, tel, map, copy}`. Addresses/phones/codes/GPS are taken from the actual bookings — treat as source of truth, don't paraphrase.
 - `TRIP` — array of days `{date, dow, mon, m, label, fit, items[]}`. `fit` = the day's wardrobe (chips + count + note). `items` = timeline entries `{time, icon, node, title, detail?, warn?, wear?, party?, stay?, arrival?}`.
 
 ## Render functions
-`applyCharacter(id)` → sets `current`, re-renders Documents + the open day. `renderDay(i)` → day selector + `buildFit` + `buildItem[]`. `buildItem` has a special `arrival:true` branch (renders the TDAC actions inline). `renderDocs()` → Documents tab. Copy-to-clipboard is delegated on `.act-copy`.
+`applyCharacter(id)` → sets `current`, re-renders Documents + the open day. `renderDay(i)` → day selector + `buildFit` + `buildItem[]`. `buildItem` has a special `arrival:true` branch (renders the TDAC actions inline). `renderDocs()` → Documents tab: member own-card (upload/view/replace) or the organizer roster. `tdac` (IIFE, plain `fetch`, no supabase-js) does `list`/`signedUrl`/`upload`; `loadTdacState()` refreshes `tdacState` then re-renders. Both `renderDocs` and the arrival branch fall back to Generate/WhatsApp when there's no token. Delegated handlers: `.act-copy` (copy), `.tdac-view` (open signed URL), `.tdac-upload` (file picker → upload).
 
 ## Conventions (important)
 - **Copy is terse and informative — never explanatory.** No "here's how this works", no scam warnings, no meta. Labels over sentences.
@@ -41,8 +41,15 @@ A single-file, mobile-first web app for a group Thailand trip (8 friends, **26 J
 - Deploy: commit + push to `trips` → Vercel rebuilds automatically. No commands.
 
 ## Current state
-Timeline home with day selector, per-day wardrobe strips, inline stay cards (call/map/copy), the Black Moon Party + the Sat-27 drive warning, arrival card on day 1, Documents tab (Generate / View + Share on WhatsApp), informative Wardrobe tab, compact footer with emergency numbers.
+Timeline home with day selector, per-day wardrobe strips, inline stay cards (call/map/copy), the Black Moon Party + the Sat-27 drive warning, arrival card on day 1, Documents tab, informative Wardrobe tab, compact footer with emergency numbers. **Self-serve TDAC uploads** are live: open your personal `?k=` link → upload your card; you see your own, the organizer (Ruthu) sees all. No link / offline → falls back to Generate + Share on WhatsApp.
 
-## Open decisions / roadmap
-- **Self-serve uploads:** current flow is Generate TDAC → share PDF on WhatsApp → organizer collects → set `ARRIVAL_DOCS` path. If we want people to upload directly and have it appear for everyone live, that needs a backend — **Supabase** (Auth + Storage + Postgres, free tier, works cross-platform, deploys alongside Vercel) is the chosen option. iCloud Drive is **not viable** (Sign in with Apple is auth-only; no public API to read/write a user's Drive; CloudKit is app-container only + paid + Apple-only).
+## Backend — self-serve TDAC uploads (Supabase)
+- Per-person **secret link** `?k=<jwt>` is the identity (no login). The JWT (`sub`=personId, `app_role`=member|organizer) is the Supabase access token; opening the link auto-picks your character and is stripped from the address bar.
+- Private Storage bucket **`tdac`**, one object per person `<personId>.pdf`. **RLS** (`supabase/setup.sql`) gates on `app_role='organizer' OR name=(auth.jwt()->>'sub')||'.pdf'` — a member can only touch their own card, the organizer reads all. Uses `auth.jwt()->>'sub'` (string ids), never `auth.uid()` (uuid cast would fail).
+- Client is **plain `fetch`** against the Storage REST API — no `supabase-js`. Public `SUPABASE_URL` + anon key live in the `TDAC` config block at the top of the script; the **JWT secret is never in the repo** (local `.env.local` + Supabase dashboard only).
+- Tokens minted by `scripts/mint-tokens.mjs` (HS256, Node built-in `crypto`, reads `.env.local`); 8 tokens total (Ruthu's doubles as organizer). RLS proven by `scripts/test-rls.sh`. Design + plan in `docs/superpowers/`.
+
+## Roadmap
 - Likely future additions, all as timeline items or new data: flight details, ferry booking times, an expense/settle-up split, a Samui restaurants/activities shortlist.
+- Optional: group-wide "N/8 uploaded" status for non-organizers (only the organizer sees the roster today).
+- iCloud Drive was ruled out for uploads (Sign in with Apple is auth-only; no public Drive API; CloudKit is app-container + paid + Apple-only).
