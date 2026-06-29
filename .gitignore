@@ -1,0 +1,10 @@
+# secrets & local env
+.env
+.env.local
+.env.*.local
+# minted token output (contains live JWTs = capability links)
+tokens.txt
+tokens.tsv
+# os / tooling noise
+.DS_Store
+.playwright-mcp/
