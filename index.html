@@ -156,9 +156,17 @@
   .tab.active { color:var(--coral); }
   .tab.active .tab-ic { filter:none; opacity:1; transform:translateY(-1px); }
 
-  .toast { position:fixed; bottom:calc(var(--tab-h) + 16px); left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:#fff; padding:12px 22px; border-radius:100px; font-size:13.5px; font-weight:500; box-shadow:0 6px 24px rgba(0,0,0,0.25); z-index:150; transition:transform 0.35s cubic-bezier(.5,0,.2,1); }
+  .toast { position:fixed; bottom:calc(var(--tab-h) + 16px); left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:#fff; padding:12px 22px; border-radius:100px; font-size:13.5px; font-weight:500; box-shadow:0 6px 24px rgba(0,0,0,0.25); z-index:150; pointer-events:none; transition:transform 0.35s cubic-bezier(.5,0,.2,1); }
   .toast.show { transform:translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion:reduce){ *,*::before,*::after{ transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
+
+  /* ---------- DOC ROSTER (organizer) ---------- */
+  .doc-row { display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:1px solid var(--sand-deep); }
+  .doc-row:last-child { border-bottom:none; }
+  .doc-row .dr-name { flex:1; font-size:14px; font-weight:600; }
+  .doc-row .dr-state { font-size:12px; font-weight:600; }
+  .doc-row .dr-state.ok { color:#1f7a4d; } .doc-row .dr-state.wait { color:var(--ink-soft); }
+  .doc-row .dr-view { font-size:12.5px; font-weight:700; color:var(--sea); text-decoration:none; padding:6px 12px; border:1px solid var(--sand-deep); border-radius:9px; background:var(--white); cursor:pointer; font-family:'Outfit'; }
 </style>
 </head>
 <body>
@@ -262,6 +270,7 @@
   <button class="tab" data-view="wardrobe"><span class="tab-ic">🧳</span>Wardrobe</button>
 </nav>
 
+<input type="file" id="tdacFile" accept="application/pdf,image/*" style="display:none">
 <div class="toast" id="toast">Copied 🎉</div>
 
 <script>
@@ -418,6 +427,60 @@
   const APP_TOKEN  = readToken();
   const APP_CLAIMS = APP_TOKEN ? decodeToken(APP_TOKEN) : null;
 
+  /* ===== TDAC CLIENT (plain fetch, no supabase-js) ===== */
+  const tdac = (() => {
+    const enabled = !!(TDAC.url && TDAC.anon && !TDAC.url.includes('YOURREF') && APP_TOKEN);
+    const headers = () => ({ apikey: TDAC.anon, Authorization: `Bearer ${APP_TOKEN}` });
+    async function list(){
+      if (!enabled) return [];
+      try {
+        const r = await fetch(`${TDAC.url}/storage/v1/object/list/${TDAC.bucket}`, {
+          method:'POST', headers:{ ...headers(), 'Content-Type':'application/json' },
+          body: JSON.stringify({ prefix:'', limit:100, offset:0 })
+        });
+        if (!r.ok) return [];
+        const rows = await r.json();
+        return Array.isArray(rows) ? rows.map(o => o.name).filter(Boolean) : [];
+      } catch(e){ return []; }
+    }
+    async function signedUrl(path){
+      if (!enabled) return null;
+      try {
+        const r = await fetch(`${TDAC.url}/storage/v1/object/sign/${TDAC.bucket}/${path}`, {
+          method:'POST', headers:{ ...headers(), 'Content-Type':'application/json' },
+          body: JSON.stringify({ expiresIn: 3600 })
+        });
+        if (!r.ok) return null;
+        const j = await r.json();
+        const rel = j.signedURL || j.signedUrl;                 // e.g. "/object/sign/tdac/vk.pdf?token=..."
+        if (!rel) return null;
+        const full = rel.startsWith('/storage/v1') ? rel
+          : (rel.startsWith('/') ? '/storage/v1' + rel : '/storage/v1/' + rel);
+        return TDAC.url + full;
+      } catch(e){ return null; }
+    }
+    async function upload(path, file){
+      if (!enabled) return false;
+      try {
+        const r = await fetch(`${TDAC.url}/storage/v1/object/${TDAC.bucket}/${path}`, {
+          method:'POST',
+          headers:{ ...headers(), 'x-upsert':'true', 'Content-Type': file.type || 'application/pdf' },
+          body: file
+        });
+        return r.ok;
+      } catch(e){ return false; }
+    }
+    return { enabled, list, signedUrl, upload };
+  })();
+
+  let tdacState = null;   // string[] of filenames visible to this token, or null = unknown/disabled
+  async function loadTdacState(){
+    if (!tdac.enabled) return;
+    tdacState = await tdac.list();
+    renderDocs();
+    renderDay(curDay);
+  }
+
   /* ===== PICKER ===== */
   const picker = document.getElementById('picker');
   document.getElementById('pickerGrid').innerHTML = CHARACTERS.map(c =>
@@ -455,20 +518,28 @@
       </div>
     </div>`;
   }
-  function arrivalState(){
-    const has = current ? ARRIVAL_DOCS[current.id] : null;
-    const nick = current ? current.nick : '';
-    const wa = `https://wa.me/?text=${encodeURIComponent('Thailand arrival card (TDAC) — ' + nick + '. Sending the PDF.')}`;
-    return { has, wa };
-  }
   function buildItem(it){
     if (it.arrival){
-      const { has, wa } = arrivalState();
+      const nick = current ? current.nick : '';
+      const wa = `https://wa.me/?text=${encodeURIComponent('Thailand arrival card (TDAC) — ' + nick + '. Sending the PDF.')}`;
+      const id = current ? current.id : null;
+      const hasBackend = tdac.enabled && tdacState !== null;
+      const has = current ? (hasBackend ? tdacState.includes(`${id}.pdf`) : !!ARRIVAL_DOCS[id]) : false;
       const detail = current ? (has ? 'On file — ready to show at the airport.' : 'Fill it before you fly. Save the QR.') : 'Tap your avatar to pick your character.';
-      const acts = current ? `<div class="stay-actions">
-          ${has ? `<a class="act act-call" href="${has}" target="_blank" rel="noopener">View card</a>` : `<a class="act act-call" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate</a>`}
+      let acts = '';
+      if (current && tdac.enabled){
+        acts = `<div class="stay-actions">
+          ${has ? `<button class="act act-call tdac-view" data-id="${id}">View card</button>`
+                : `<a class="act act-call" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate</a>`}
+          <button class="act tdac-upload" data-id="${id}">${has?'Replace':'Upload'}</button>
+        </div>`;
+      } else if (current){
+        acts = `<div class="stay-actions">
+          ${has ? `<a class="act act-call" href="${ARRIVAL_DOCS[id]}" target="_blank" rel="noopener">View card</a>`
+                : `<a class="act act-call" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate</a>`}
           <a class="act" href="${wa}" target="_blank" rel="noopener">Share</a>
-        </div>` : '';
+        </div>`;
+      }
       return `<div class="tl-item">
         <div class="tl-rail"><div class="tl-node coral">🪪</div></div>
         <div class="tl-content">
@@ -522,25 +593,56 @@
   const docsView = document.getElementById('docsView');
   function renderDocs(){
     if (!current){ docsView.innerHTML = `<div class="doc-empty">Tap your avatar to pick your character.</div>`; return; }
-    const has = ARRIVAL_DOCS[current.id];
-    const msg = encodeURIComponent(`Thailand arrival card (TDAC) — ${current.nick}. Sending the PDF.`);
-    const wa = `https://wa.me/?text=${msg}`;
-    docsView.innerHTML = `<div class="doc-card">
-      <div class="doc-top">
+
+    // Organizer roster
+    if (tdac.enabled && APP_CLAIMS && APP_CLAIMS.app_role === 'organizer'){
+      const rows = CHARACTERS.map(c => {
+        const has = tdacState ? tdacState.includes(`${c.id}.pdf`) : false;
+        return `<div class="doc-row">
+          <span class="dr-name">${c.nick} <span style="color:var(--ink-soft);font-weight:400">${c.full}</span></span>
+          <span class="dr-state ${has?'ok':'wait'}">${has?'On file':'—'}</span>
+          ${has?`<button class="dr-view tdac-view" data-id="${c.id}">View</button>`:''}
+        </div>`;
+      }).join('');
+      const count = tdacState ? tdacState.filter(n=>n.endsWith('.pdf')).length : 0;
+      docsView.innerHTML = `<div class="doc-card">
+        <div class="doc-top"><div class="doc-ico">🪪</div><div><div class="doc-name">Arrival cards</div><div class="doc-state wait">${tdacState?`${count}/8 on file`:'Loading…'}</div></div></div>
+        ${rows}
+      </div>
+      <div class="doc-card">${ownCardCardInner()}</div>`;
+      return;
+    }
+
+    // Member (own card)
+    docsView.innerHTML = `<div class="doc-card">${ownCardCardInner()}</div>`;
+  }
+
+  function ownCardCardInner(){
+    const id = current.id;
+    const hasBackend = tdac.enabled && tdacState !== null;
+    const has = hasBackend ? tdacState.includes(`${id}.pdf`) : !!ARRIVAL_DOCS[id];
+    const wa = `https://wa.me/?text=${encodeURIComponent(`Thailand arrival card (TDAC) — ${current.nick}. Sending the PDF.`)}`;
+    let actions;
+    if (tdac.enabled){
+      actions = has
+        ? `<button class="dact primary tdac-view" data-id="${id}">View arrival card</button>
+           <button class="dact ghost tdac-upload" data-id="${id}">Replace</button>`
+        : `<a class="dact primary" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate one</a>
+           <button class="dact ghost tdac-upload" data-id="${id}">Upload your card</button>`;
+    } else {
+      actions = has
+        ? `<a class="dact primary" href="${ARRIVAL_DOCS[id]}" target="_blank" rel="noopener">View arrival card</a>
+           <a class="dact ghost" href="${wa}" target="_blank" rel="noopener">Share on WhatsApp</a>`
+        : `<a class="dact primary" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate one</a>
+           <a class="dact ghost" href="${wa}" target="_blank" rel="noopener">Share on WhatsApp</a>`;
+    }
+    return `<div class="doc-top">
         <div class="doc-ico">🪪</div>
-        <div>
-          <div class="doc-name">Arrival card</div>
-          <div class="doc-state ${has?'ok':'wait'}">${current.nick} · ${has?'On file':'Not added yet'}</div>
-        </div>
+        <div><div class="doc-name">Arrival card</div>
+        <div class="doc-state ${has?'ok':'wait'}">${current.nick} · ${has?'On file':'Not added yet'}</div></div>
       </div>
-      <div class="doc-actions">
-        ${has
-          ? `<a class="dact primary" href="${has}" target="_blank" rel="noopener">View arrival card</a>`
-          : `<a class="dact primary" href="https://tdac.immigration.go.th" target="_blank" rel="noopener">Generate one</a>`}
-        <a class="dact ghost" href="${wa}" target="_blank" rel="noopener">Share on WhatsApp</a>
-      </div>
-      <div class="doc-fine">File within 72h of landing. Save the QR.</div>
-    </div>`;
+      <div class="doc-actions">${actions}</div>
+      <div class="doc-fine">File within 72h of landing. Save the QR.</div>`;
   }
 
   /* ===== TABS ===== */
@@ -562,6 +664,25 @@
     catch(err){ showToast('Copy not available here'); }
   });
 
+  /* ===== TDAC view / upload (delegated) ===== */
+  const tdacFile = document.getElementById('tdacFile');
+  let pendingUploadId = null;
+  document.body.addEventListener('click', async (e) => {
+    const v = e.target.closest('.tdac-view');
+    if (v){ const u = await tdac.signedUrl(`${v.dataset.id}.pdf`); if (u) window.open(u, '_blank', 'noopener'); else showToast('Could not open'); return; }
+    const up = e.target.closest('.tdac-upload');
+    if (up){ pendingUploadId = up.dataset.id; tdacFile.value = ''; tdacFile.click(); }
+  });
+  tdacFile.addEventListener('change', async () => {
+    const file = tdacFile.files && tdacFile.files[0];
+    if (!file || !pendingUploadId) return;
+    showToast('Uploading…');
+    const ok = await tdac.upload(`${pendingUploadId}.pdf`, file);
+    pendingUploadId = null;
+    showToast(ok ? 'Card uploaded ✓' : 'Upload failed');
+    if (ok) await loadTdacState();
+  });
+
   /* ===== TABS already wired above ===== */
 
   /* ===== INIT ===== */
@@ -574,6 +695,7 @@
   const now = new Date(); let start = 0;
   TRIP.forEach((d,i) => { if (now.getFullYear()===2026 && (now.getMonth()+1)===d.m && now.getDate()===parseInt(d.date)) start = i; });
   renderDay(start);
+  if (tdac.enabled) loadTdacState();
 </script>
 </body>
 </html>
