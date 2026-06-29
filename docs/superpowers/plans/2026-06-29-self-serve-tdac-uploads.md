@@ -154,8 +154,8 @@ test('a wrong secret does not verify (tamper check)', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd /Users/vivek.natarajan/Documents/Personal/Projects/trips && node --test scripts/`
-Expected: FAIL — `Cannot find module './mint-tokens.mjs'` (or `mintToken is not a function`).
+Run: `cd /Users/vivek.natarajan/Documents/Personal/Projects/trips && node --test scripts/mint-tokens.test.mjs`
+Expected: FAIL — `Cannot find module './mint-tokens.mjs'` (or `mintToken is not a function`). (Node 25 parses a bare `scripts/` dir arg as a module path, so pass the test file explicitly.)
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -209,8 +209,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd /Users/vivek.natarajan/Documents/Personal/Projects/trips && node --test scripts/`
-Expected: PASS — `# pass 2`, `# fail 0`.
+Run: `cd /Users/vivek.natarajan/Documents/Personal/Projects/trips && node --test scripts/mint-tokens.test.mjs`
+Expected: PASS — `tests 2`, `pass 2`, `fail 0`.
 
 - [ ] **Step 5: Commit**
 
